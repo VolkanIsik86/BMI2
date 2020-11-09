@@ -1,0 +1,306 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+
+
+```{r, echo=FALSE,fig.align='center',out.width="25%"}
+knitr::include_graphics("dtu.png")
+```
+
+\bigskip
+
+\bigskip
+
+\bigskip
+
+\bigskip
+
+\bigskip
+
+\bigskip
+
+\begin{center} 
+{\huge Danmark Tekniske Universitet}
+\end{center} 
+***
+\begin{center} 
+{\huge 02323 Introduktion til statistik}
+\end{center}
+
+\bigskip
+
+\bigskip
+
+\bigskip
+
+\begin{center} 
+{\huge Projekt 2: BMI}
+\end{center} 
+
+
+
+\bigskip
+
+\bigskip
+
+\begin{center} 
+`r format(Sys.Date(), "%d.%B.%Y")`
+\end{center} 
+
+\medskip
+
+
+```{r, echo=FALSE,fig.align='center',out.width="75%"}
+knitr::include_graphics("volkan.jpg")
+```
+
+\medskip
+
+\begin{center} 
+Volkan Isik, s180103
+\end{center} 
+\pagebreak
+
+```{r include=FALSE}
+## I RStudio kan man nemt sætte working directory med menuen
+## "Session -> Set Working Directory -> To Source File Location"
+## Bemærk: i R bruges kun "/" til separering i stier
+## (altså ingen backslash).
+setwd("/home/volkan/Dokumenter/Bmi2")
+D <- read.table("bmi2_data.csv", header = TRUE, sep = ";")
+```
+
+```{r include=FALSE}
+# Tilføj log-BMI til datasættet
+D$logbmi <- log(D$bmi)
+```
+
+*a) Lav en kort deskriptiv analyse og opsummering af data for variablene logbmi, age og fastfood. Inkluder scatterplots af logaritmen til BMI mod de to andre variable, samt histogrammer og boxplots af alle tre variable. Der skal også være en tabel med opsummerende størrelser, som for hver variabel inkluderer antal observationer, gennemsnit, standardafvigelse, median, samt 25%- og 75%-fraktiler.*
+
+\medskip
+
+Der er i alt 847 respondenter med 4 forskellige variabler og 3388 observationer:
+
+* id: Respondentens vægt
+* bmi: Respondentens bmi i højde/kg^2. Kvantativ variable.
+* age: Respondentens alder. Kvantativ variable.
+* fastfood: Respondentens fastfoor-forbrug. Kontinuert variable.
+
+#### Histogramer
+```{r echo=FALSE,fig.align='center', out.width="75%"}
+## Histogram der beskriver den empiriske tæthed for BMI
+## (histogram for BMI normaliseret så arealet er lig 1)
+layout(matrix(c(1,2,3),1,3))
+hist(D$logbmi, xlab="LOG-BMI", main="Densitet Histogram af Hele Befolkningen",col = "green", prob=TRUE)
+hist(D$age, xlab="Alder", main="Densitet Histogram af Hele Befolkningen",col = "blue", prob=TRUE)
+hist(D$fastfood, xlab="Fastfood", main="Densitet Histogram af Hele Befolkningen",col = "red", prob=TRUE)
+```
+De tre histogram viser fordelingen af observationerne. Log-Bmi histogramen viser at observationerne er normalfordelt(logtransformeret). Alder histogrammen er normalfordelt og der findes mange forskellige observationer i forskellige alder gennemsnit ligger omkring 45. Fastfood observationerne har en højre skæv fordeling. Man kan se at der er en del ekstremer i denne fordeling 
+
+#### Boxploter
+```{r echo=FALSE,fig.align='center', out.width="75%"}
+## Boxplot af BMI opdelt efter køn
+layout(matrix(c(1,2,3),1,3))
+boxplot(D$logbmi, col = "green", ylab="BMI")
+boxplot(D$age,col = "blue", ylab="Age")
+boxplot(D$fastfood,col = "red", ylab="Fastfood")
+
+```
+
+Bmi boxplotten bekræfter normal fordeling hvor man kan se medianen som står midten af sin boks.Den har en nedrekvartil ca. 3,1 og en øvrekvartil lidt over 3,3. Alder bloxplotten har normalfordeling.Medianen står ved 45, nedrekvartil ved 32 og øvre kvartil ved 57. Fastfood ser ud til at være højre skæv og har en del ekstremer.  
+
+```{r echo=FALSE}
+layout(matrix(c(1,2),1,2))
+
+plot(D$age ~ D$logbmi, xlab="BMI", ylab="Age")
+abline(lm(D$age ~ D$logbmi))
+
+plot(D$fastfood ~ D$logbmi, xlab="BMI", ylab="Fastfood")
+abline(lm(D$fastfood ~ D$logbmi))
+
+```
+
+Scatterplotten undersøger vi om der er sammenhæng imellem BMI og de andre variabler alder og fastfood. Der ser ud til at der er linær sammenhæng imellem BMI og alder. Der kan ikke ses en sammenhæng i mellem BMI og Fastfood. De fleste observationer i fastfood er ligger omkring 0 - 10. Det betyder at populationen har lav fastfood tal for de meste.
+
+```{r echo=FALSE,comment=NA}
+
+
+## Lav en for-løkke med beregning af et par opsummerende størrelser
+## og gem resultatet i en ny data.frame
+
+Tbl <- data.frame()
+
+Tbl["BMI", "n"] <- length(D$logbmi)
+Tbl["BMI", "mean"] <- mean(D$logbmi)
+Tbl["BMI", "var"] <- var(D$logbmi)
+Tbl["BMI", "sd"] <- sd (D$logbmi)
+Tbl["BMI", "Q1"] <- quantile (D$logbmi,probs = 0.25)
+Tbl["BMI", "Q2"] <- quantile (D$logbmi,probs = 0.50)
+Tbl["BMI", "Q3"] <- quantile (D$logbmi,probs = 0.75)
+
+Tbl["AGE", "n"] <- length(D$age)
+Tbl["AGE", "mean"] <- mean(D$age)
+Tbl["AGE", "var"] <- var(D$age)
+Tbl["AGE", "sd"] <- sd (D$age)
+Tbl["AGE", "Q1"] <- quantile (D$age,probs = 0.25)
+Tbl["AGE", "Q2"] <- quantile (D$age,probs = 0.50)
+Tbl["AGE", "Q3"] <- quantile (D$age,probs = 0.75)
+
+Tbl["FASTFOOD", "n"] <- length(D$fastfood)
+Tbl["FASTFOOD", "mean"] <- mean(D$fastfood)
+Tbl["FASTFOOD", "var"] <- var(D$fastfood)
+Tbl["FASTFOOD", "sd"] <- sd (D$fastfood)
+Tbl["FASTFOOD", "Q1"] <- quantile (D$fastfood,probs = 0.25)
+Tbl["FASTFOOD", "Q2"] <- quantile (D$fastfood,probs = 0.50)
+Tbl["FASTFOOD", "Q3"] <- quantile (D$fastfood,probs = 0.75)
+
+## Se hvad der er i Tbl
+Tbl
+
+
+```
+
+Tabellen viser de nøjagtige tal fra populationen . Variansen er meget lave i de forskellige variabler. Man kan se at nedrekvartil og medianen er 6 for fastfood hvilket betyder de meste af befolkning har fastfood tal omkring dette. Man kan se de helt store forskel i mellem gennemsnittet og medianen for fastfood hvilket bekræfter den højreskæve fordeling.
+
+```{r include=FALSE}
+# Deldatasæt med de første 840 observationer (til model)
+D_model <- subset(D, id <= 840)
+
+# Deldatasæt med de sidste 7 observationer (til validering)
+D_test <- subset(D, id >= 841)
+```
+
+
+*b) Opstil en multipel lineær regressionsmodel med logaritmen til BMI som responsva- riabel (Y i ), og med alder og fastfood-forbrug som forklarende variable (hhv. x 1,i og x 2,i ). Husk at angive forudsætningerne/de statistiske antagelser for modellen. (Se bemærkning 5.6, ligning (6-1) og eksempel 6.1).*
+
+$$Y_i = \beta_0 + \beta_1x_{1,i} + \beta_2x_{2,i}+\epsilon \sim N(0,\sigma^2) \textrm{ and i.i.d where } i=1,....,n$$
+
+#### Hvor:
+
+* Y~i~ er log BMI for måling i
+* x~1,i~ er alder for måling i
+* x~2,i~ er fastfood for måling i
+
+
+*c) Estimer modellens parametre, som består af regressionskoefficienterne, her kaldet $\beta_0$  , $\beta_1$ , $\beta_2$ , og residualernes varians, $\mu^2$.*
+
+```{r echo=FALSE,comment=NA}
+# Estimer multipel lineær regressionsmodel
+fit <- lm(logbmi ~ age + fastfood, data = D_model)
+
+# Vis estimerede parametre mm.
+summary(fit)
+```
+
+
+Udefra summary kan vi se at:
+
+* $\beta_0$ $estimat= 3.1124298$ skæring i linjen $\sigma^2= 0.0193517$
+
+* $\beta_1$ $estimat= 0.0023744$ hældning for alder $\sigma^2= 0.0003890$ variansen for alder
+
+* $\beta_2$ $estimat= 0.0005404$ hældning for fastfood $\sigma^2= 0.0001732$ variansen for fastfood
+
+* residualernes varians, $\sigma^2=0.1573$ $Frihedsgrader=837$
+
+* $R^2=0.04487$ Den forklarende variabel: Man kan se at kun 5% af alle observationer kan forklares med denne regression.
+
+*d) Foretag modelkontrol for at undersøge, om forudsætningerne for modellen (mo- dellens antagelser) er opfyldte. Benyt de plots, der kan laves ved hjælp af R-koden nedenfor, som udgangspunkt for din vurdering. (Se afsnit 6.4 om residualanalyse).*
+
+```{r echo=FALSE,fig.align='center',out.width="75%"}
+layout(matrix(c(1,2,3,4),1,4))
+# Plots til modelkontrol
+
+# Observationer mod fittede værdier
+plot(fit$fitted.values, D_model$logbmi, xlab = "Fittede værdier",     
+       ylab = "log(BMI)")
+
+# Residualer mod hver af de forklarende variable
+plot(D_model$age, fit$residuals, 
+        xlab = "AGE", ylab = "Residualer")
+
+# Residualer mod fittede værdier
+plot(fit$fitted.values, fit$residuals, xlab = "Fittede værdier", 
+     ylab = "Residualer")
+
+# Normal QQ-plot af residualerne
+qqnorm(fit$residuals, ylab = "Residualer", xlab = "Z-scores", 
+       main = "")
+qqline(fit$residuals)
+```
+
+Graferne viser at der er ingen linær sammenhæng i mellem residualerne og alder.
+
+```{r echo=FALSE,fig.align='center',out.width="75%"}
+layout(matrix(c(1,2,3,4),1,4))
+# Plots til modelkontrol
+
+# Observationer mod fittede værdier
+plot(fit$fitted.values, D_model$logbmi, xlab = "Fittede værdier",     
+       ylab = "log(BMI)")
+
+# Residualer mod hver af de forklarende variable
+plot(D_model$fastfood, fit$residuals, 
+        xlab = "Fastfood", ylab = "Residualer")
+
+# Residualer mod fittede værdier
+plot(fit$fitted.values, fit$residuals, xlab = "Fittede værdier", 
+     ylab = "Residualer")
+
+# Normal QQ-plot af residualerne
+qqnorm(fit$residuals, ylab = "Residualer", xlab = "Z-scores", 
+       main = "")
+qqline(fit$residuals)
+```
+
+Man kan igen se at der er ikke noden linærsammmenhæng i mellem residualerne og fastfood obsevationerne.
+
+*e) Angiv formlen for et 95% konfidensinterval for koefficienten for alder, her kal- det $\beta_1$ . (Se metode 6.5). Indsæt tal i formlen og beregn konfidensintervallet. Benyt derefter nedenstående R-kode til at kontrollere resultatet og til at bestemme konfidensintervaller for de to andre koefficienter i modellen.*
+
+Formlen for konfidensintervaller $\hat{\beta_1}$
+
+$$ \hat{\beta_1}\pm t_{1-a/2}\hat{\sigma_{\beta_1}}  $$
+
+```{r echo=FALSE}
+qt(0.975,df=(length(D_model$age)-2))
+
+0.0023744-1.962799 * 0.0003890
+0.0023744+1.962799 * 0.0003890
+```
+
+$$ 0.002374 \pm 1.96278 * 6.104  $$
+
+$$ [0.001611;0.003138]  $$
+
+
+*f) Man er interesseret i, om $\beta_1$ kunne have værdien 0.001. Opstil den tilsvarende hypotese. Anvend signifikansniveauet $\alpha$ = 0.05. Angiv formlen for den relevante teststørrelse (se metode 6.4), indsæt tal og beregn teststørrelsen. Angiv fordelingen af teststørrelsen (inkl. frihedsgrader), beregn p-værdien og konkluder.*
+
+Hypotesen:
+
+$$ H_{0,i} : \beta_i=0.001  $$
+
+$$ H_{1,i} : \beta_i \neq 0.001  $$
+
+$$t_{obs,\beta_i}= \frac{\hat{\beta_i}-\beta_{0,i}}{\hat{\sigma_{\beta_i}}}$$
+
+
+```{r echo=FALSE}
+n<-length(D$age)
+tobs<-abs((0.0023744-0.001)/0.0003890)
+p_value<-2*(1-pt(tobs,df=n-2))
+```
+
+
+$$ p-value_i=2P(T>|t_{obs,\beta_i}|) $$
+
+$$ p-value_i=2P(T>|3.53316|) $$
+
+$$ p-value_i= 0.0004329 $$
+
+
+Der blev påvist signifikant effekt.
+
